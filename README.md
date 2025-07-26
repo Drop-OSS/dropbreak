@@ -1,8 +1,8 @@
-Rustbreak
-=========
+# Dropbreak (Rustbreak)
 
-[![Build Status](https://travis-ci.org/TheNeikos/rustbreak.svg?branch=master)](https://travis-ci.org/TheNeikos/rustbreak)
-[![Crates Link](https://img.shields.io/crates/v/rustbreak.svg)](https://crates.io/crates/rustbreak)
+# About this fork
+
+We forked Rustbreak because it was 1. no longer maintained, and 2. we needed it to be `async`. Feel free to use this fork in your own code, though. No promise of maintenance or warranty is made.
 
 **[Documentation][doc]**
 
@@ -11,8 +11,7 @@ database. It is meant to be fast and simple to use. You add it to your
 application and it should just work for you. The only thing you will have to
 take care of is saving.
 
-When to use it
---------------
+## When to use it
 
 This library started out because of a need to be able to quickly write an
 application in rust that needed some persistence while still being able to write
@@ -21,24 +20,21 @@ arbitrary data to it.
 In Ruby there is [Daybreak] however for Rust there was no similar crate, until
 now!
 
-When not to use it
-------------------
+## When not to use it
 
-Rustbreak makes several trade-offs to be easy to use and extend, so knowing of these drawbacks is important if 
+Rustbreak makes several trade-offs to be easy to use and extend, so knowing of these drawbacks is important if
 you wish to use the library:
 
 - The Database needs to fit into memory (Rustbreak cannot do partial loads/saves, so if the Database exceeds your available memory you will run OOM)
 - Not all backends support atomic saves, so if your program crashes while it is saving you might save incomplete data (Notably only `PathBackend` supports atomic saves)
 
-Features
---------
+## Features
 
 - Simple To Use, Fast, Secure
 - Threadsafe
 - Serde compatible storage (ron, bincode, or yaml included)
 
-Quickstart
-----------
+## Quickstart
 
 Add this to your `Cargo.toml`:
 
@@ -73,20 +69,19 @@ fn main() -> rustbreak::Result<()> {
 }
 ```
 
-Usage
------
+## Usage
 
 Usage is quite simple:
 
 - Create/open a database using one of the Database constructors:
-    - Create a `FileDatabase` with `FileDatabase::from_path`.
-    - Create a `MemoryDatabase` with `MemoryDatabase::memory`.
-    - Create a `MmapDatabase` with `MmapDatabase::mmap` or `MmapDatabase::mmap_with_size` with `mmap` feature.
-    - Create a `Database` with `Database::from_parts`.
+  - Create a `FileDatabase` with `FileDatabase::from_path`.
+  - Create a `MemoryDatabase` with `MemoryDatabase::memory`.
+  - Create a `MmapDatabase` with `MmapDatabase::mmap` or `MmapDatabase::mmap_with_size` with `mmap` feature.
+  - Create a `Database` with `Database::from_parts`.
 - `Write`/`Read` data from the Database
 - Don't forget to run `save` periodically, or whenever it makes sense.
-    - You can save in parallel to using the Database. However you will lock
-      write acess while it is being written to storage.
+  - You can save in parallel to using the Database. However you will lock
+    write acess while it is being written to storage.
 
 ```rust
 # use std::collections::HashMap;
@@ -149,6 +144,5 @@ features = ["bin_enc"]
 
 You can now use `rustbreak::deser::Bincode` as deserialization struct.
 
-
-[doc]:http://neikos.me/rustbreak/rustbreak/index.html
-[Daybreak]:https://propublica.github.io/daybreak/
+[doc]: http://neikos.me/rustbreak/rustbreak/index.html
+[Daybreak]: https://propublica.github.io/daybreak/

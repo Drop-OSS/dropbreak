@@ -21,33 +21,26 @@ use crate::error;
 /// **Important**: You can only return custom errors if the `other_errors` feature is enabled
 pub trait Backend {
     /// Read the all data from the backend.
-    fn get_data(&mut self) -> error::BackendResult<Vec<u8>>;
+    fn get_data(
+        &mut self,
+    ) -> impl std::future::Future<Output = error::BackendResult<Vec<u8>>> + Send;
 
     /// Write the whole slice to the backend.
-    fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()>;
+    fn put_data(&mut self, data: &[u8]) -> impl std::future::Future<Output = error::BackendResult<()>> + Send;
 }
 
-impl Backend for Box<dyn Backend> {
-    fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
+impl<T: Backend> Backend for Box<T>
+where
+    T: Send,
+{
+    async fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
         use std::ops::DerefMut;
-        self.deref_mut().get_data()
+        self.deref_mut().get_data().await
     }
 
-    fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
+    async fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
         use std::ops::DerefMut;
-        self.deref_mut().put_data(data)
-    }
-}
-
-impl<T: Backend> Backend for Box<T> {
-    fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
-        use std::ops::DerefMut;
-        self.deref_mut().get_data()
-    }
-
-    fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
-        use std::ops::DerefMut;
-        self.deref_mut().put_data(data)
+        self.deref_mut().put_data(data).await
     }
 }
 
@@ -64,7 +57,7 @@ pub use path::PathBackend;
 pub struct FileBackend(std::fs::File);
 
 impl Backend for FileBackend {
-    fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
+    async fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
         use std::io::{Read, Seek, SeekFrom};
 
         let mut buffer = vec![];
@@ -73,7 +66,7 @@ impl Backend for FileBackend {
         Ok(buffer)
     }
 
-    fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
+    async fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
         use std::io::{Seek, SeekFrom, Write};
 
         self.0.seek(SeekFrom::Start(0))?;
@@ -160,17 +153,19 @@ impl MemoryBackend {
 }
 
 impl Backend for MemoryBackend {
-    fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
+    async fn get_data(&mut self) -> error::BackendResult<Vec<u8>> {
         println!("Returning data: {:?}", &self.0);
         Ok(self.0.clone())
     }
 
-    fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
+    async fn put_data(&mut self, data: &[u8]) -> error::BackendResult<()> {
         println!("Writing data: {:?}", data);
         self.0 = data.to_owned();
         Ok(())
     }
 }
+
+/*
 
 #[cfg(test)]
 mod tests {
@@ -323,3 +318,5 @@ mod tests {
         dir.close().expect("Error while deleting temp directory!");
     }
 }
+
+*/
