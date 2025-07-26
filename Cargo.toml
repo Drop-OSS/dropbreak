@@ -24,7 +24,7 @@ tempfile = "3"
 thiserror = "1.0.20"
 
 [dependencies.tokio]
-version = "1.46.1"
+version = "^1.40"
 features = ["sync", "rt", "macros", "fs", "io-util"]
 
 [dependencies.ron]
